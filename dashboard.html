@@ -700,42 +700,50 @@
 // CONFIG
 // ═══════════════════════════════════════════════════════
 const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
-const CORS = 'https://corsproxy.io/?';
-const YF_QUOTE = `${CORS}${encodeURIComponent('https://query1.finance.yahoo.com/v7/finance/quote?symbols=')}`;
-const YF_QUOTE2 = `${CORS}${encodeURIComponent('https://query2.finance.yahoo.com/v7/finance/quote?symbols=')}`;
 
 const INDICES = [
-  { sym: '^GSPC',   label: 'S&P 500',        statId: 'stat-sp500'  },
-  { sym: '^GSPTSE', label: 'TSX',             statId: 'stat-tsx'    },
-  { sym: '^IXIC',   label: 'Nasdaq',          statId: 'stat-nasdaq' },
-  { sym: 'CADUSD=X',label: 'CAD/USD',         statId: null          },
-  { sym: 'USDCAD=X',label: 'USD/CAD',         statId: 'stat-usdcad' },
-  { sym: '^DJI',    label: 'DJIA',            statId: null          },
-  { sym: '^VIX',    label: 'VIX',             statId: null          },
-  { sym: 'BTC-USD', label: 'Bitcoin',         statId: null          },
-  { sym: 'GC=F',    label: 'Gold',            statId: null          },
-  { sym: 'CL=F',    label: 'Crude Oil',       statId: null          },
+  { sym: '^GSPC',   label: 'S&P 500'   },
+  { sym: '^GSPTSE', label: 'TSX'       },
+  { sym: '^IXIC',   label: 'Nasdaq'    },
+  { sym: 'USDCAD=X',label: 'USD/CAD'  },
+  { sym: '^DJI',    label: 'DJIA'      },
+  { sym: '^VIX',    label: 'VIX'       },
+  { sym: 'BTC-USD', label: 'Bitcoin'   },
+  { sym: 'GC=F',    label: 'Gold'      },
+  { sym: 'CL=F',    label: 'Crude Oil' },
 ];
 
 const DEFAULT_WATCHLIST = [
-  { sym: 'XIU.TO',  name: 'iShares TSX 60' },
-  { sym: 'BRK-B',   name: 'Berkshire B'    },
-  { sym: 'KKR',     name: 'KKR & Co.'      },
-  { sym: 'APO',     name: 'Apollo Global'  },
-  { sym: 'BX',      name: 'Blackstone'     },
-  { sym: 'CG',      name: 'Carlyle Group'  },
+  { sym: 'XIU.TO', name: 'iShares TSX 60' },
+  { sym: 'BRK-B',  name: 'Berkshire B'   },
+  { sym: 'KKR',    name: 'KKR & Co.'     },
+  { sym: 'APO',    name: 'Apollo Global' },
+  { sym: 'BX',     name: 'Blackstone'    },
+  { sym: 'CG',     name: 'Carlyle Group' },
 ];
 
 const FEEDS = {
-  business: { url: 'https://feeds.bbci.co.uk/news/business/rss.xml',                       name: 'BBC Business',    count: 12 },
-  ma:       { url: 'https://www.globenewswire.com/RssFeed/subjectcode/M-A-Mergers-Acquisitions', name: 'GlobeNewswire M&A', count: 12 },
-  canada:   { url: 'https://financialpost.com/feed',                                        name: 'Financial Post',  count: 12 },
-  markets:  { url: 'https://feeds.marketwatch.com/marketwatch/topstories/',                 name: 'MarketWatch',     count: 12 },
-  reuters:  { url: 'https://feeds.bbci.co.uk/news/rss.xml',                                name: 'BBC News',        count: 10 },
-  fp:       { url: 'https://financialpost.com/feed',                                        name: 'Financial Post',  count: 10 },
-  mw:       { url: 'https://feeds.marketwatch.com/marketwatch/topstories/',                 name: 'MarketWatch',     count: 10 },
-  yf:       { url: 'https://finance.yahoo.com/rss/topfinstories',                          name: 'Yahoo Finance',   count: 10 },
+  business: { url: 'https://feeds.bbci.co.uk/news/business/rss.xml',                            name: 'BBC Business',     count: 12 },
+  ma:       { url: 'https://www.globenewswire.com/RssFeed/subjectcode/M-A-Mergers-Acquisitions', name: 'GlobeNewswire M&A',count: 12 },
+  canada:   { url: 'https://financialpost.com/feed',                                             name: 'Financial Post',   count: 12 },
+  markets:  { url: 'https://feeds.marketwatch.com/marketwatch/topstories/',                      name: 'MarketWatch',      count: 12 },
+  reuters:  { url: 'https://feeds.bbci.co.uk/news/rss.xml',                                     name: 'BBC News',         count: 10 },
+  fp:       { url: 'https://financialpost.com/feed',                                             name: 'Financial Post',   count: 10 },
+  mw:       { url: 'https://feeds.marketwatch.com/marketwatch/topstories/',                      name: 'MarketWatch',      count: 10 },
+  yf:       { url: 'https://finance.yahoo.com/rss/topfinstories',                               name: 'Yahoo Finance',    count: 10 },
 };
+
+const MARKET_ROWS = [
+  { sym: '^GSPC',    desc: 'S&P 500',         cat: 'US Equity'  },
+  { sym: '^GSPTSE',  desc: 'TSX Composite',    cat: 'CA Equity'  },
+  { sym: '^IXIC',    desc: 'Nasdaq Composite', cat: 'US Equity'  },
+  { sym: '^DJI',     desc: 'Dow Jones',        cat: 'US Equity'  },
+  { sym: '^VIX',     desc: 'CBOE Volatility',  cat: 'Volatility' },
+  { sym: 'USDCAD=X', desc: 'USD / CAD',        cat: 'FX'         },
+  { sym: 'GC=F',     desc: 'Gold Futures',     cat: 'Commodity'  },
+  { sym: 'CL=F',     desc: 'Crude Oil WTI',    cat: 'Commodity'  },
+  { sym: 'BTC-USD',  desc: 'Bitcoin USD',      cat: 'Crypto'     },
+];
 
 // ═══════════════════════════════════════════════════════
 // STATE
@@ -772,23 +780,40 @@ function startCountdown() {
 }
 
 // ═══════════════════════════════════════════════════════
-// QUOTE FETCHER (Yahoo Finance with CORS fallback)
+// QUOTE FETCHER — tries 3 CORS proxies + direct, returns first success
 // ═══════════════════════════════════════════════════════
+async function tryFetch(url) {
+  const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
 async function fetchQuotes(symbols) {
-  const syms = symbols.join(',');
+  const syms = encodeURIComponent(symbols.join(','));
   const fields = 'regularMarketPrice,regularMarketChange,regularMarketChangePercent,shortName';
-  const urls = [
-    `${CORS}${encodeURIComponent(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}`)}`,
-    `${CORS}${encodeURIComponent(`https://query2.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}`)}`,
+  const base1 = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}`;
+  const base2 = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}`;
+
+  const attempts = [
+    // allorigins wraps response in {contents: "...json..."}
+    () => tryFetch(`https://api.allorigins.win/get?url=${encodeURIComponent(base1)}`)
+            .then(d => JSON.parse(d.contents)),
+    () => tryFetch(`https://api.allorigins.win/get?url=${encodeURIComponent(base2)}`)
+            .then(d => JSON.parse(d.contents)),
+    // corsproxy returns raw JSON
+    () => tryFetch(`https://corsproxy.io/?${encodeURIComponent(base1)}`),
+    () => tryFetch(`https://corsproxy.io/?${encodeURIComponent(base2)}`),
+    // direct (works in some browsers / during market hours)
+    () => tryFetch(base1),
+    () => tryFetch(base2),
   ];
-  for (const url of urls) {
+
+  for (const attempt of attempts) {
     try {
-      const r = await fetch(url);
-      if (!r.ok) continue;
-      const data = await r.json();
+      const data = await attempt();
       const result = data?.quoteResponse?.result;
       if (result && result.length) return result;
-    } catch(e) {}
+    } catch(e) { /* try next */ }
   }
   return [];
 }
@@ -800,10 +825,7 @@ function fmt(n, decimals=2) {
 function fmtChg(chg, pct) {
   if (chg == null) return { text: '—', cls: 'na' };
   const sign = chg >= 0 ? '+' : '';
-  return {
-    text: `${sign}${fmt(chg)} (${sign}${fmt(pct)}%)`,
-    cls: chg >= 0 ? 'up' : 'dn'
-  };
+  return { text: `${sign}${fmt(chg)} (${sign}${fmt(pct)}%)`, cls: chg >= 0 ? 'up' : 'dn' };
 }
 
 // ═══════════════════════════════════════════════════════
@@ -812,119 +834,84 @@ function fmtChg(chg, pct) {
 async function loadTicker() {
   const allSyms = [...INDICES.map(i => i.sym), ...watchlist.map(w => w.sym)];
   const quotes = await fetchQuotes(allSyms);
-
-  if (!quotes.length) {
-    document.getElementById('tickerInner').innerHTML =
-      `<span class="ticker-loading">Market data unavailable — check browser CORS settings or open from a web server</span>`;
-    return;
-  }
-
   const map = {};
   quotes.forEach(q => map[q.symbol] = q);
 
-  let html = '';
-  const tickerItems = [...INDICES, ...watchlist.map(w => ({ sym: w.sym, label: w.name || w.sym }))];
+  if (!quotes.length) {
+    document.getElementById('tickerInner').innerHTML =
+      `<span class="ticker-loading">⚠ Market data unavailable — all proxies failed. Try refreshing in a moment.</span>`;
+    return;
+  }
 
-  tickerItems.forEach(item => {
+  let html = '';
+  const items = [...INDICES, ...watchlist.map(w => ({ sym: w.sym, label: w.name || w.sym }))];
+  items.forEach(item => {
     const q = map[item.sym];
     if (!q) return;
-    const price = fmt(q.regularMarketPrice);
     const chg = fmtChg(q.regularMarketChange, q.regularMarketChangePercent);
     html += `<div class="ticker-item">
-      <span class="t-sym">${item.label || item.sym}</span>
-      <span class="t-price">${price}</span>
+      <span class="t-sym">${item.label}</span>
+      <span class="t-price">${fmt(q.regularMarketPrice)}</span>
       <span class="t-chg ${chg.cls}">${chg.text}</span>
     </div>`;
   });
 
-  // Duplicate for seamless loop
-  const content = html + html;
-  document.getElementById('tickerInner').innerHTML = content;
-  // Adjust animation speed based on item count
-  const itemCount = tickerItems.filter(i => map[i.sym]).length;
-  const duration = Math.max(30, itemCount * 4);
-  document.getElementById('tickerInner').style.animationDuration = duration + 's';
+  document.getElementById('tickerInner').innerHTML = html + html;
+  const count = items.filter(i => map[i.sym]).length;
+  document.getElementById('tickerInner').style.animationDuration = Math.max(30, count * 4) + 's';
 }
 
 // ═══════════════════════════════════════════════════════
 // STATS ROW
 // ═══════════════════════════════════════════════════════
 async function loadStats() {
-  const statSyms = ['^GSPC', '^GSPTSE', '^IXIC', 'USDCAD=X'];
-  const quotes = await fetchQuotes(statSyms);
+  const quotes = await fetchQuotes(['^GSPC', '^GSPTSE', '^IXIC', 'USDCAD=X']);
   const map = {};
   quotes.forEach(q => map[q.symbol] = q);
 
-  const pairs = [
-    ['^GSPC',   'stat-sp500',  'stat-sp500-chg'],
-    ['^GSPTSE', 'stat-tsx',    'stat-tsx-chg'],
-    ['^IXIC',   'stat-nasdaq', 'stat-nasdaq-chg'],
-    ['USDCAD=X','stat-usdcad', 'stat-usdcad-chg'],
-  ];
-  pairs.forEach(([sym, valId, chgId]) => {
+  [
+    ['^GSPC',    'stat-sp500',  'stat-sp500-chg'],
+    ['^GSPTSE',  'stat-tsx',    'stat-tsx-chg'],
+    ['^IXIC',    'stat-nasdaq', 'stat-nasdaq-chg'],
+    ['USDCAD=X', 'stat-usdcad','stat-usdcad-chg'],
+  ].forEach(([sym, valId, chgId]) => {
     const q = map[sym];
     if (!q) return;
-    const el = document.getElementById(valId);
-    const chgEl = document.getElementById(chgId);
-    if (el) el.textContent = fmt(q.regularMarketPrice);
-    if (chgEl) {
-      const chg = fmtChg(q.regularMarketChange, q.regularMarketChangePercent);
-      chgEl.textContent = chg.text;
-      chgEl.className = 'stat-sub ' + chg.cls;
-    }
+    document.getElementById(valId).textContent = fmt(q.regularMarketPrice);
+    const chg = fmtChg(q.regularMarketChange, q.regularMarketChangePercent);
+    const el = document.getElementById(chgId);
+    el.textContent = chg.text;
+    el.className = 'stat-sub ' + chg.cls;
   });
 }
 
 // ═══════════════════════════════════════════════════════
 // MARKETS TABLE
 // ═══════════════════════════════════════════════════════
-const MARKET_ROWS = [
-  { sym: '^GSPC',    desc: 'S&P 500',          cat: 'US Equity' },
-  { sym: '^GSPTSE',  desc: 'TSX Composite',     cat: 'CA Equity' },
-  { sym: '^IXIC',    desc: 'Nasdaq Composite',  cat: 'US Equity' },
-  { sym: '^DJI',     desc: 'Dow Jones',         cat: 'US Equity' },
-  { sym: '^VIX',     desc: 'CBOE Volatility',   cat: 'Volatility'},
-  { sym: 'USDCAD=X', desc: 'USD / CAD',         cat: 'FX'        },
-  { sym: 'GC=F',     desc: 'Gold Futures',      cat: 'Commodity' },
-  { sym: 'CL=F',     desc: 'Crude Oil WTI',     cat: 'Commodity' },
-  { sym: 'BTC-USD',  desc: 'Bitcoin USD',       cat: 'Crypto'    },
-];
-
 async function loadMarkets() {
-  const syms = MARKET_ROWS.map(r => r.sym);
-  const quotes = await fetchQuotes(syms);
+  const quotes = await fetchQuotes(MARKET_ROWS.map(r => r.sym));
   const map = {};
   quotes.forEach(q => map[q.symbol] = q);
 
   if (!quotes.length) {
-    document.getElementById('mktBody').innerHTML = `<div style="padding:14px; color:var(--muted); font-size:12px;">Market data unavailable.</div>`;
+    document.getElementById('mktBody').innerHTML = `<div style="padding:14px;color:var(--muted);font-size:12px;">Market data unavailable — retrying on next refresh.</div>`;
     return;
   }
 
-  let html = `<table class="markets-table">
-    <thead><tr>
-      <th>Instrument</th>
-      <th>Price</th>
-      <th>Change</th>
-    </tr></thead><tbody>`;
-
+  let html = `<table class="markets-table"><thead><tr><th>Instrument</th><th>Price</th><th>Change</th></tr></thead><tbody>`;
   MARKET_ROWS.forEach(row => {
     const q = map[row.sym];
     if (!q) return;
     const chg = fmtChg(q.regularMarketChange, q.regularMarketChangePercent);
     html += `<tr>
-      <td>
-        <div class="sym-name">${row.desc}</div>
-        <div class="sym-desc">${row.sym} · ${row.cat}</div>
-      </td>
+      <td><div class="sym-name">${row.desc}</div><div class="sym-desc">${row.sym} · ${row.cat}</div></td>
       <td><span class="price-val">${fmt(q.regularMarketPrice)}</span></td>
       <td><span class="chg-pill ${chg.cls}">${chg.text}</span></td>
     </tr>`;
   });
-
   html += '</tbody></table>';
   document.getElementById('mktBody').innerHTML = html;
-  document.getElementById('mktUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-CA', {hour:'2-digit', minute:'2-digit'});
+  document.getElementById('mktUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-CA', {hour:'2-digit',minute:'2-digit'});
 }
 
 // ═══════════════════════════════════════════════════════
@@ -933,33 +920,23 @@ async function loadMarkets() {
 async function loadWatchlist() {
   const syms = watchlist.map(w => w.sym);
   if (!syms.length) {
-    document.getElementById('watchlistBody').innerHTML = `<div style="color:var(--muted); font-size:12px; padding:10px 0;">No symbols. Click + Add to add tickers.</div>`;
+    document.getElementById('watchlistBody').innerHTML = `<div style="color:var(--muted);font-size:12px;padding:10px 0;">No symbols. Click + Add.</div>`;
     return;
   }
-
   const quotes = await fetchQuotes(syms);
   const map = {};
   quotes.forEach(q => map[q.symbol] = q);
 
-  let html = '';
-  watchlist.forEach((w, idx) => {
+  document.getElementById('watchlistBody').innerHTML = watchlist.map((w, idx) => {
     const q = map[w.sym];
     const price = q ? fmt(q.regularMarketPrice) : '—';
     const chg = q ? fmtChg(q.regularMarketChange, q.regularMarketChangePercent) : { text:'—', cls:'na' };
-    html += `<div class="watch-item">
-      <div>
-        <div class="watch-sym">${w.sym}</div>
-        <div class="watch-name">${w.name || (q && q.shortName) || ''}</div>
-      </div>
-      <div class="watch-price">
-        <div class="watch-price-val">${price}</div>
-        <div class="watch-chg ${chg.cls}">${chg.text}</div>
-      </div>
-      <button onclick="removeWatch(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 0 0 8px;" title="Remove">×</button>
+    return `<div class="watch-item">
+      <div><div class="watch-sym">${w.sym}</div><div class="watch-name">${w.name || (q?.shortName) || ''}</div></div>
+      <div class="watch-price"><div class="watch-price-val">${price}</div><div class="watch-chg ${chg.cls}">${chg.text}</div></div>
+      <button onclick="removeWatch(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 0 0 8px;">×</button>
     </div>`;
-  });
-
-  document.getElementById('watchlistBody').innerHTML = html || '<div style="color:var(--muted); font-size:12px; padding:10px 0;">Empty watchlist.</div>';
+  }).join('') || '<div style="color:var(--muted);font-size:12px;padding:10px 0;">Empty watchlist.</div>';
 }
 
 function removeWatch(idx) {
@@ -987,14 +964,14 @@ function addToWatchlist() {
 }
 
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+document.querySelectorAll('.modal-overlay').forEach(m =>
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
 
 // ═══════════════════════════════════════════════════════
-// NEWS FEEDS (rss2json)
+// NEWS FEEDS — staggered to respect rss2json rate limits
 // ═══════════════════════════════════════════════════════
 function timeAgo(dateStr) {
-  const d = new Date(dateStr);
-  const diff = Date.now() - d.getTime();
+  const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return 'just now';
   if (mins < 60) return mins + 'm ago';
@@ -1004,23 +981,25 @@ function timeAgo(dateStr) {
 }
 
 function stripHtml(s) {
-  const tmp = document.createElement('div');
-  tmp.innerHTML = s;
-  return tmp.textContent || tmp.innerText || '';
+  const d = document.createElement('div');
+  d.innerHTML = s;
+  return d.textContent || d.innerText || '';
 }
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function fetchRSS(feedKey) {
   const feed = FEEDS[feedKey];
   if (!feed) return [];
   const url = `${RSS2JSON}${encodeURIComponent(feed.url)}&count=${feed.count || 10}`;
   try {
-    const r = await fetch(url);
+    const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!r.ok) throw new Error(r.status);
     const data = await r.json();
-    if (data.status !== 'ok') throw new Error(data.message);
+    if (data.status !== 'ok') throw new Error(data.message || 'feed error');
     return data.items || [];
   } catch(e) {
-    return null; // null = error, [] = empty
+    return null;
   }
 }
 
@@ -1028,7 +1007,7 @@ function renderNews(listId, items, sourceName) {
   const el = document.getElementById(listId);
   if (!el) return;
   if (items === null) {
-    el.innerHTML = `<li><div class="news-error">⚠ Could not load feed. This may be a CORS restriction when opening as a local file. Try running from a local server (e.g. <code>python -m http.server</code>).</div></li>`;
+    el.innerHTML = `<li><div class="news-error">⚠ Feed unavailable right now — will retry on next refresh.</div></li>`;
     return;
   }
   if (!items.length) {
@@ -1039,15 +1018,11 @@ function renderNews(listId, items, sourceName) {
     const title = stripHtml(item.title || '').trim();
     const time = timeAgo(item.pubDate);
     const link = item.link || '#';
-    const src = item.author || sourceName || '';
     return `<li class="news-item">
       <div class="news-dot"></div>
       <div class="news-body">
         <a class="news-title" href="${link}" target="_blank" rel="noopener">${title}</a>
-        <div class="news-meta">
-          <span class="news-source">${sourceName}</span>
-          <span>${time}</span>
-        </div>
+        <div class="news-meta"><span class="news-source">${sourceName}</span><span>${time}</span></div>
       </div>
     </li>`;
   }).join('');
@@ -1056,49 +1031,55 @@ function renderNews(listId, items, sourceName) {
 async function loadAllNews() {
   document.getElementById('newsUpdated').textContent = 'Refreshing…';
 
-  const tasks = [
-    fetchRSS('business').then(items => renderNews('list-business', items, 'Reuters')),
-    fetchRSS('ma').then(items => renderNews('list-ma', items, 'Reuters M&A')),
-    fetchRSS('canada').then(items => renderNews('list-canada', items, 'Financial Post')),
-    fetchRSS('markets').then(items => renderNews('list-markets', items, 'MarketWatch')),
-    fetchRSS('reuters').then(items => renderNews('list-reuters', items, 'Reuters')),
-    fetchRSS('fp').then(items => renderNews('list-fp', items, 'Financial Post')),
-    fetchRSS('mw').then(items => renderNews('list-mw', items, 'MarketWatch')),
-    fetchRSS('yf').then(items => renderNews('list-yf', items, 'Yahoo Finance')),
+  // Load in pairs with 1.2s gap to avoid rss2json rate limits (1 req/sec free tier)
+  const pairs = [
+    ['business', 'BBC Business'], ['ma', 'GlobeNewswire M&A'],
+    ['canada',   'Financial Post'],['markets', 'MarketWatch'],
+    ['reuters',  'BBC News'],      ['fp', 'Financial Post'],
+    ['mw',       'MarketWatch'],   ['yf', 'Yahoo Finance'],
   ];
 
-  await Promise.allSettled(tasks);
-  document.getElementById('newsUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-CA', {hour:'2-digit', minute:'2-digit'});
+  const listMap = {
+    business: 'list-business', ma: 'list-ma', canada: 'list-canada',
+    markets: 'list-markets', reuters: 'list-reuters', fp: 'list-fp',
+    mw: 'list-mw', yf: 'list-yf',
+  };
+
+  for (let i = 0; i < pairs.length; i++) {
+    const [key, name] = pairs[i];
+    fetchRSS(key).then(items => renderNews(listMap[key], items, name));
+    if (i < pairs.length - 1) await sleep(1200);
+  }
+
+  document.getElementById('newsUpdated').textContent =
+    'Updated ' + new Date().toLocaleTimeString('en-CA', {hour:'2-digit', minute:'2-digit'});
 }
 
 // ═══════════════════════════════════════════════════════
-// ECONOMIC CALENDAR (static, key upcoming events)
+// ECONOMIC CALENDAR
 // ═══════════════════════════════════════════════════════
 function buildEconCalendar() {
-  // Manually curated; updated weekly by user or automatically
   const events = [
-    { date: 'Jun 4',  name: 'US ISM Services PMI (May)', impact: 'high' },
-    { date: 'Jun 4',  name: 'Bank of Canada Rate Decision', impact: 'high' },
-    { date: 'Jun 5',  name: 'US ADP Employment Report (May)', impact: 'med' },
-    { date: 'Jun 6',  name: 'US Non-Farm Payrolls (May)', impact: 'high' },
-    { date: 'Jun 6',  name: 'Canada Employment (May)', impact: 'high' },
-    { date: 'Jun 10', name: 'US CPI Inflation (May)', impact: 'high' },
-    { date: 'Jun 11', name: 'US PPI (May)', impact: 'med' },
-    { date: 'Jun 12', name: 'Federal Reserve Rate Decision', impact: 'high' },
-    { date: 'Jun 13', name: 'University of Michigan Sentiment', impact: 'med' },
-    { date: 'Jun 18', name: 'US Retail Sales (May)', impact: 'med' },
-    { date: 'Jun 25', name: 'US GDP Q1 Final Revision', impact: 'med' },
+    { date: 'Jun 4',  name: 'Bank of Canada Rate Decision',       impact: 'high' },
+    { date: 'Jun 4',  name: 'US ISM Services PMI (May)',           impact: 'high' },
+    { date: 'Jun 5',  name: 'US ADP Employment Report (May)',      impact: 'med'  },
+    { date: 'Jun 6',  name: 'US Non-Farm Payrolls (May)',          impact: 'high' },
+    { date: 'Jun 6',  name: 'Canada Employment (May)',             impact: 'high' },
+    { date: 'Jun 10', name: 'US CPI Inflation (May)',              impact: 'high' },
+    { date: 'Jun 11', name: 'US PPI (May)',                        impact: 'med'  },
+    { date: 'Jun 12', name: 'Federal Reserve Rate Decision',       impact: 'high' },
+    { date: 'Jun 13', name: 'University of Michigan Sentiment',    impact: 'med'  },
+    { date: 'Jun 18', name: 'US Retail Sales (May)',               impact: 'med'  },
+    { date: 'Jun 25', name: 'US GDP Q1 Final Revision',            impact: 'med'  },
   ];
-
-  const impactClass = { high: 'impact-high', med: 'impact-med', low: 'impact-low' };
-  const impactLabel = { high: '● High', med: '● Med', low: '● Low' };
-
-  document.getElementById('econCalendar').innerHTML = events.map(e => `
-    <div class="econ-item">
+  const ic = { high: 'impact-high', med: 'impact-med', low: 'impact-low' };
+  const il = { high: '● High', med: '● Med', low: '● Low' };
+  document.getElementById('econCalendar').innerHTML = events.map(e =>
+    `<div class="econ-item">
       <div class="econ-date">${e.date}</div>
       <div class="econ-body">
         <div class="econ-name">${e.name}</div>
-        <span class="econ-impact ${impactClass[e.impact]}">${impactLabel[e.impact]}</span>
+        <span class="econ-impact ${ic[e.impact]}">${il[e.impact]}</span>
       </div>
     </div>`).join('');
 }
@@ -1107,15 +1088,15 @@ function buildEconCalendar() {
 // TABS
 // ═══════════════════════════════════════════════════════
 function switchTab(group, panelId, tabEl) {
-  const container = tabEl.closest('.card');
-  container.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  container.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
+  const card = tabEl.closest('.card');
+  card.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  card.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
   tabEl.classList.add('active');
   document.getElementById(panelId).classList.add('active');
 }
 
 // ═══════════════════════════════════════════════════════
-// CHIPS / FEED TOGGLE
+// CHIPS
 // ═══════════════════════════════════════════════════════
 function toggleFeed(feed, chip) {
   chip.classList.toggle('active');
@@ -1127,17 +1108,12 @@ function toggleFeed(feed, chip) {
 
 function syncChips() {
   document.querySelectorAll('[data-feed]').forEach(chip => {
-    const feed = chip.dataset.feed;
-    if (activeFeeds.includes(feed)) chip.classList.add('active');
-    else chip.classList.remove('active');
+    chip.classList.toggle('active', activeFeeds.includes(chip.dataset.feed));
   });
 }
 
-// ═══════════════════════════════════════════════════════
-// SETTINGS MODAL (stub)
-// ═══════════════════════════════════════════════════════
 function openSettings() {
-  alert('Customize feed chips above the dashboard to toggle news categories on/off.\n\nUse the Watchlist "+ Add" button to add custom stock symbols.');
+  alert('Use the chips above to toggle news focus areas.\nUse "+ Add" in the Watchlist to track any ticker symbol.');
 }
 
 // ═══════════════════════════════════════════════════════
