@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>White Owl Intelligence Dashboard</title>
+<style>
+  :root {
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --surface2: #f8f9fb;
+    --border: #e2e6ea;
+    --accent: #1a3a5c;
+    --accent2: #2563eb;
+    --green: #16a34a;
+    --red: #dc2626;
+    --text: #1e2a3a;
+    --muted: #6b7a8d;
+    --tag-bg: #e8f0fe;
+    --tag-text: #1a56db;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08);
+    --radius: 10px;
+    font-size: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--accent);
+    color: #fff;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo { font-size: 17px; font-weight: 700; letter-spacing: 0.3px; color: #fff; }
+  .logo span { color: #93c5fd; }
+  .header-clock { font-size: 13px; color: #cbd5e1; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .btn-icon {
+    background: rgba(255,255,255,0.12);
+    border: none;
+    color: #fff;
+    border-radius: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.15s;
+  }
+  .btn-icon:hover { background: rgba(255,255,255,0.22); }
+  .refresh-indicator { font-size: 11px; color: #94a3b8; }
+
+  /* ── TICKER BAR ── */
+  .ticker-bar {
+    background: #0f2744;
+    overflow: hidden;
+    height: 34px;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .ticker-inner {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    white-space: nowrap;
+    animation: ticker-scroll 60s linear infinite;
+    will-change: transform;
+  }
+  .ticker-inner:hover { animation-play-state: paused; }
+  @keyframes ticker-scroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 18px;
+    border-right: 1px solid rgba(255,255,255,0.07);
+    height: 100%;
+    cursor: default;
+    transition: background 0.15s;
+  }
+  .ticker-item:hover { background: rgba(255,255,255,0.05); }
+  .t-sym { font-weight: 600; font-size: 12px; color: #e2e8f0; }
+  .t-price { font-size: 12px; color: #cbd5e1; }
+  .t-chg { font-size: 11px; font-weight: 600; }
+  .t-chg.up { color: #4ade80; }
+  .t-chg.dn { color: #f87171; }
+  .ticker-loading { color: #64748b; font-size: 12px; padding: 0 20px; }
+
+  /* ── MAIN LAYOUT ── */
+  .main {
+    padding: 16px 18px;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  /* ── GRID ── */
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .grid-2-1 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 1100px) {
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .grid-2-1 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 700px) {
+    .grid-3, .grid-2-1, .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  /* ── WIDGET CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .card-header {
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    flex-shrink: 0;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .card-icon { font-size: 14px; }
+  .card-meta { font-size: 11px; color: var(--muted); }
+  .card-body { padding: 12px 14px; flex: 1; overflow-y: auto; }
+  .card-body.no-pad { padding: 0; }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    padding: 0 14px;
+    gap: 0;
+    flex-shrink: 0;
+  }
+  .tab {
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab.active {
+    color: var(--accent2);
+    border-bottom-color: var(--accent2);
+  }
+  .tab:hover:not(.active) { color: var(--text); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── NEWS ITEMS ── */
+  .news-list { list-style: none; }
+  .news-item {
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .news-item:last-child { border-bottom: none; }
+  .news-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .news-body { flex: 1; min-width: 0; }
+  .news-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+    text-decoration: none;
+    display: block;
+  }
+  .news-title:hover { color: var(--accent2); text-decoration: underline; }
+  .news-meta {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .news-source {
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 10px;
+  }
+  .news-loading {
+    text-align: center;
+    color: var(--muted);
+    padding: 30px;
+    font-size: 13px;
+  }
+  .news-error {
+    color: var(--red);
+    font-size: 12px;
+    padding: 12px;
+    background: #fef2f2;
+    border-radius: 6px;
+    margin: 8px;
+  }
+
+  /* ── MARKETS TABLE ── */
+  .markets-table { width: 100%; border-collapse: collapse; }
+  .markets-table th {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--muted);
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .markets-table th:not(:first-child) { text-align: right; }
+  .markets-table td {
+    padding: 7px 8px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .markets-table td:not(:first-child) { text-align: right; }
+  .markets-table tr:last-child td { border-bottom: none; }
+  .markets-table tr:hover td { background: var(--surface2); }
+  .sym-name { font-weight: 600; color: var(--accent); font-size: 13px; }
+  .sym-desc { font-size: 11px; color: var(--muted); }
+  .price-val { font-weight: 600; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .chg-pill {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'SF Mono', monospace;
+  }
+  .chg-pill.up { background: #dcfce7; color: #15803d; }
+  .chg-pill.dn { background: #fee2e2; color: #b91c1c; }
+  .chg-pill.na { background: #f1f5f9; color: var(--muted); }
+  .mkt-loading { text-align: center; padding: 20px; color: var(--muted); font-size: 13px; }
+
+  /* ── MINI STATS ROW ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 800px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    box-shadow: var(--shadow);
+  }
+  .stat-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+  .stat-value { font-size: 20px; font-weight: 700; color: var(--text); font-family: 'SF Mono', monospace; }
+  .stat-sub { font-size: 11px; margin-top: 3px; font-weight: 600; }
+  .stat-sub.up { color: var(--green); }
+  .stat-sub.dn { color: var(--red); }
+
+  /* ── ECON CALENDAR ── */
+  .econ-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .econ-item:last-child { border-bottom: none; }
+  .econ-date {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent2);
+    background: var(--tag-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .econ-body { flex: 1; }
+  .econ-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .econ-impact {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    display: inline-block;
+    margin-top: 2px;
+  }
+  .impact-high { background: #fef2f2; color: #b91c1c; }
+  .impact-med { background: #fefce8; color: #854d0e; }
+  .impact-low { background: #f0fdf4; color: #166534; }
+
+  /* ── FEAR/GREED GAUGE ── */
+  .gauge-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0 4px;
+  }
+  .gauge-arc {
+    width: 140px;
+    height: 70px;
+    position: relative;
+    overflow: visible;
+  }
+  .gauge-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+  .gauge-value { font-size: 28px; font-weight: 800; color: var(--text); }
+  .gauge-reading { font-size: 13px; font-weight: 700; margin-top: 2px; }
+
+  /* ── SEARCH / SETTINGS ── */
+  .settings-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 18px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .settings-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .chip.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .chip:hover:not(.active) { border-color: var(--accent2); color: var(--accent2); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+  /* ── SPINNER ── */
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent2);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── LAST UPDATED ── */
+  .last-updated { font-size: 10px; color: var(--muted); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .modal h3 { font-size: 16px; margin-bottom: 14px; color: var(--accent); }
+  .modal label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--text); }
+  .modal input, .modal select {
+    width: 100%; padding: 8px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    color: var(--text);
+    background: var(--surface);
+  }
+  .modal input:focus, .modal select:focus {
+    outline: none;
+    border-color: var(--accent2);
+  }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #254f80; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1.5px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+
+  /* ── WATCHLIST ── */
+  .watch-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .watch-item:last-child { border-bottom: none; }
+  .watch-sym { font-weight: 700; font-size: 14px; color: var(--accent); font-family: monospace; }
+  .watch-name { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .watch-price { text-align: right; }
+  .watch-price-val { font-size: 14px; font-weight: 700; font-family: monospace; }
+  .watch-chg { font-size: 11px; font-weight: 700; }
+  .watch-chg.up { color: var(--green); }
+  .watch-chg.dn { color: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">White <span>Owl</span> | Intelligence Dashboard</div>
+    <div class="header-clock" id="clock"></div>
+  </div>
+  <div class="header-right">
+    <span class="refresh-indicator" id="nextRefresh"></span>
+    <button class="btn-icon" onclick="refreshAll()">⟳ Refresh</button>
+    <button class="btn-icon" onclick="openSettings()">⚙ Customize</button>
+  </div>
+</div>
+
+<!-- TICKER BAR -->
+<div class="ticker-bar">
+  <div class="ticker-inner" id="tickerInner">
+    <span class="ticker-loading">Loading market data…</span>
+  </div>
+</div>
+
+<!-- SETTINGS BAR (Industries) -->
+<div class="settings-bar">
+  <span class="settings-label">News Focus:</span>
+  <span class="chip active" data-feed="ma" onclick="toggleFeed('ma', this)">⚡ M&amp;A / PE</span>
+  <span class="chip active" data-feed="markets" onclick="toggleFeed('markets', this)">📈 Markets</span>
+  <span class="chip active" data-feed="canada" onclick="toggleFeed('canada', this)">🍁 Canada</span>
+  <span class="chip" data-feed="tech" onclick="toggleFeed('tech', this)">💻 Technology</span>
+  <span class="chip" data-feed="industrial" onclick="toggleFeed('industrial', this)">🏭 Industrial</span>
+  <span class="chip" data-feed="real-estate" onclick="toggleFeed('real-estate', this)">🏗 Real Estate</span>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main" id="mainContent">
+
+  <!-- STATS ROW -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card">
+      <div class="stat-label">S&P 500</div>
+      <div class="stat-value" id="stat-sp500">—</div>
+      <div class="stat-sub" id="stat-sp500-chg">Loading…</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">TSX Composite</div>
+      <div class="stat-value" id="stat-tsx">—</div>
+      <div class="stat-sub" id="stat-tsx-chg">Loading…</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Nasdaq 100</div>
+      <div class="stat-value" id="stat-nasdaq">—</div>
+      <div class="stat-sub" id="stat-nasdaq-chg">Loading…</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">USD / CAD</div>
+      <div class="stat-value" id="stat-usdcad">—</div>
+      <div class="stat-sub" id="stat-usdcad-chg">Loading…</div>
+    </div>
+  </div>
+
+  <!-- ROW 1: Markets + News (2-1) -->
+  <div class="grid-2-1">
+
+    <!-- NEWS WIDGET (big) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="card-icon">📰</span> Live News Feed</div>
+        <span class="card-meta last-updated" id="newsUpdated"></span>
+      </div>
+      <div class="tabs" id="newsTabs">
+        <div class="tab active" data-panel="panel-business" onclick="switchTab('news', 'panel-business', this)">Business</div>
+        <div class="tab" data-panel="panel-ma" onclick="switchTab('news', 'panel-ma', this)">M&amp;A / PE</div>
+        <div class="tab" data-panel="panel-canada" onclick="switchTab('news', 'panel-canada', this)">Canada</div>
+        <div class="tab" data-panel="panel-markets" onclick="switchTab('news', 'panel-markets', this)">Markets</div>
+      </div>
+      <div class="card-body no-pad" style="max-height: 460px; overflow-y: auto;">
+        <div id="panel-business" class="tab-content active" style="padding:4px 14px 10px;">
+          <ul class="news-list" id="list-business"><li class="news-loading"><span class="spinner"></span> Loading…</li></ul>
+        </div>
+        <div id="panel-ma" class="tab-content" style="padding:4px 14px 10px;">
+          <ul class="news-list" id="list-ma"><li class="news-loading"><span class="spinner"></span> Loading…</li></ul>
+        </div>
+        <div id="panel-canada" class="tab-content" style="padding:4px 14px 10px;">
+          <ul class="news-list" id="list-canada"><li class="news-loading"><span class="spinner"></span> Loading…</li></ul>
+        </div>
+        <div id="panel-markets" class="tab-content" style="padding:4px 14px 10px;">
+          <ul class="news-list" id="list-markets"><li class="news-loading"><span class="spinner"></span> Loading…</li></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div style="display:flex; flex-direction:column; gap:14px;">
+
+      <!-- MARKETS TABLE -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="card-icon">📊</span> Markets</div>
+          <span class="card-meta last-updated" id="mktUpdated"></span>
+        </div>
+        <div class="card-body no-pad">
+          <div id="mktBody" class="mkt-loading"><span class="spinner"></span></div>
+        </div>
+      </div>
+
+      <!-- FEAR & GREED + WATCHLIST tabs -->
+      <div class="card" style="flex:1;">
+        <div class="card-header">
+          <div class="card-title"><span class="card-icon">👁</span> Watchlist</div>
+          <button class="btn-icon" style="font-size:11px; padding:3px 8px; background:var(--tag-bg); color:var(--accent2); border-radius:4px;" onclick="openAddWatch()">+ Add</button>
+        </div>
+        <div class="card-body no-pad" style="max-height:220px; overflow-y:auto;">
+          <div id="watchlistBody" style="padding: 6px 14px 10px;">
+            <div class="mkt-loading"><span class="spinner"></span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ROW 2: Industry news (3 columns) -->
+  <div class="grid-3">
+
+    <!-- BREAKING / TOP STORIES -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="card-icon">🔴</span> Breaking / Reuters</div>
+      </div>
+      <div class="card-body no-pad" style="max-height:320px; overflow-y:auto; padding: 4px 14px 10px;">
+        <ul class="news-list" id="list-reuters"><li class="news-loading"><span class="spinner"></span> Loading…</li></ul>
+      </div>
+    </div>
+
+    <!-- FINANCIAL POST (Canada-specific) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="card-icon">🍁</span> Financial Post</div>
+      </div>
+      <div class="card-body no-pad" style="max-height:320px; overflow-y:auto; padding: 4px 14px 10px;">
+        <ul class="news-list" id="list-fp"><li class="news-loading"><span class="spinner"></span> Loading…</li></ul>
+      </div>
+    </div>
+
+    <!-- ECON CALENDAR (static + update weekly) -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="card-icon">📅</span> Economic Calendar</div>
+        <span class="card-meta">This week</span>
+      </div>
+      <div class="card-body no-pad" style="max-height:320px; overflow-y:auto; padding: 4px 14px 10px;">
+        <div id="econCalendar"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW 3: More feeds -->
+  <div class="grid-2">
+
+    <!-- MARKETWATCH -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="card-icon">📉</span> MarketWatch</div>
+      </div>
+      <div class="card-body no-pad" style="max-height:280px; overflow-y:auto; padding: 4px 14px 10px;">
+        <ul class="news-list" id="list-mw"><li class="news-loading"><span class="spinner"></span> Loading…</li></ul>
+      </div>
+    </div>
+
+    <!-- SEEKING ALPHA / YAHOO FINANCE -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="card-icon">💡</span> Yahoo Finance Top Stories</div>
+      </div>
+      <div class="card-body no-pad" style="max-height:280px; overflow-y:auto; padding: 4px 14px 10px;">
+        <ul class="news-list" id="list-yf"><li class="news-loading"><span class="spinner"></span> Loading…</li></ul>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /main -->
+
+<!-- ADD WATCHLIST MODAL -->
+<div class="modal-overlay" id="addWatchModal">
+  <div class="modal">
+    <h3>Add to Watchlist</h3>
+    <label>Ticker Symbol</label>
+    <input type="text" id="watchSymInput" placeholder="e.g. AAPL, XIU.TO, ^GSPC" style="text-transform:uppercase;">
+    <label>Display Name (optional)</label>
+    <input type="text" id="watchNameInput" placeholder="e.g. iShares TSX 60">
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('addWatchModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addToWatchlist()">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
+const YF_QUOTE = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=';
+const YF_QUOTE2 = 'https://query2.finance.yahoo.com/v7/finance/quote?symbols=';
+
+const INDICES = [
+  { sym: '^GSPC',   label: 'S&P 500',        statId: 'stat-sp500'  },
+  { sym: '^GSPTSE', label: 'TSX',             statId: 'stat-tsx'    },
+  { sym: '^IXIC',   label: 'Nasdaq',          statId: 'stat-nasdaq' },
+  { sym: 'CADUSD=X',label: 'CAD/USD',         statId: null          },
+  { sym: 'USDCAD=X',label: 'USD/CAD',         statId: 'stat-usdcad' },
+  { sym: '^DJI',    label: 'DJIA',            statId: null          },
+  { sym: '^VIX',    label: 'VIX',             statId: null          },
+  { sym: 'BTC-USD', label: 'Bitcoin',         statId: null          },
+  { sym: 'GC=F',    label: 'Gold',            statId: null          },
+  { sym: 'CL=F',    label: 'Crude Oil',       statId: null          },
+];
+
+const DEFAULT_WATCHLIST = [
+  { sym: 'XIU.TO',  name: 'iShares TSX 60' },
+  { sym: 'BRK-B',   name: 'Berkshire B'    },
+  { sym: 'KKR',     name: 'KKR & Co.'      },
+  { sym: 'APO',     name: 'Apollo Global'  },
+  { sym: 'BX',      name: 'Blackstone'     },
+  { sym: 'CG',      name: 'Carlyle Group'  },
+];
+
+const FEEDS = {
+  business: { url: 'https://feeds.reuters.com/reuters/businessNews', name: 'Reuters', count: 12 },
+  ma:       { url: 'https://feeds.reuters.com/reuters/mergersNews',   name: 'Reuters M&A', count: 12 },
+  canada:   { url: 'https://financialpost.com/feed',                  name: 'Financial Post', count: 12 },
+  markets:  { url: 'https://feeds.marketwatch.com/marketwatch/marketpulse/', name: 'MarketWatch', count: 12 },
+  reuters:  { url: 'https://feeds.reuters.com/reuters/topNews',       name: 'Reuters Top', count: 10 },
+  fp:       { url: 'https://financialpost.com/feed',                  name: 'Financial Post', count: 10 },
+  mw:       { url: 'https://feeds.marketwatch.com/marketwatch/topstories/', name: 'MarketWatch', count: 10 },
+  yf:       { url: 'https://finance.yahoo.com/rss/topfinstories',     name: 'Yahoo Finance', count: 10 },
+};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let watchlist = JSON.parse(localStorage.getItem('wo_watchlist') || 'null') || DEFAULT_WATCHLIST;
+let activeFeeds = JSON.parse(localStorage.getItem('wo_feeds') || 'null') || ['ma','markets','canada'];
+let refreshTimer = null;
+let refreshCountdown = 300;
+
+// ═══════════════════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  const opts = { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', timeZoneName:'short' };
+  document.getElementById('clock').textContent = now.toLocaleString('en-CA', opts);
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ═══════════════════════════════════════════════════════
+// COUNTDOWN
+// ═══════════════════════════════════════════════════════
+function startCountdown() {
+  refreshCountdown = 300;
+  clearInterval(refreshTimer);
+  refreshTimer = setInterval(() => {
+    refreshCountdown--;
+    const m = Math.floor(refreshCountdown / 60);
+    const s = refreshCountdown % 60;
+    document.getElementById('nextRefresh').textContent = `Auto-refresh in ${m}:${s.toString().padStart(2,'0')}`;
+    if (refreshCountdown <= 0) { refreshAll(); }
+  }, 1000);
+}
+
+// ═══════════════════════════════════════════════════════
+// QUOTE FETCHER (Yahoo Finance with CORS fallback)
+// ═══════════════════════════════════════════════════════
+async function fetchQuotes(symbols) {
+  const syms = symbols.join(',');
+  const urls = [
+    `${YF_QUOTE}${encodeURIComponent(syms)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,shortName`,
+    `${YF_QUOTE2}${encodeURIComponent(syms)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,shortName`,
+  ];
+  for (const url of urls) {
+    try {
+      const r = await fetch(url, { mode: 'cors', headers: { 'Accept': 'application/json' } });
+      if (!r.ok) continue;
+      const data = await r.json();
+      return data?.quoteResponse?.result || [];
+    } catch(e) {}
+  }
+  // Fallback: chart endpoint for single symbols (slower but more reliable)
+  return [];
+}
+
+function fmt(n, decimals=2) {
+  if (n == null || isNaN(n)) return '—';
+  return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+function fmtChg(chg, pct) {
+  if (chg == null) return { text: '—', cls: 'na' };
+  const sign = chg >= 0 ? '+' : '';
+  return {
+    text: `${sign}${fmt(chg)} (${sign}${fmt(pct)}%)`,
+    cls: chg >= 0 ? 'up' : 'dn'
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// TICKER BAR
+// ═══════════════════════════════════════════════════════
+async function loadTicker() {
+  const allSyms = [...INDICES.map(i => i.sym), ...watchlist.map(w => w.sym)];
+  const quotes = await fetchQuotes(allSyms);
+
+  if (!quotes.length) {
+    document.getElementById('tickerInner').innerHTML =
+      `<span class="ticker-loading">Market data unavailable — check browser CORS settings or open from a web server</span>`;
+    return;
+  }
+
+  const map = {};
+  quotes.forEach(q => map[q.symbol] = q);
+
+  let html = '';
+  const tickerItems = [...INDICES, ...watchlist.map(w => ({ sym: w.sym, label: w.name || w.sym }))];
+
+  tickerItems.forEach(item => {
+    const q = map[item.sym];
+    if (!q) return;
+    const price = fmt(q.regularMarketPrice);
+    const chg = fmtChg(q.regularMarketChange, q.regularMarketChangePercent);
+    html += `<div class="ticker-item">
+      <span class="t-sym">${item.label || item.sym}</span>
+      <span class="t-price">${price}</span>
+      <span class="t-chg ${chg.cls}">${chg.text}</span>
+    </div>`;
+  });
+
+  // Duplicate for seamless loop
+  const content = html + html;
+  document.getElementById('tickerInner').innerHTML = content;
+  // Adjust animation speed based on item count
+  const itemCount = tickerItems.filter(i => map[i.sym]).length;
+  const duration = Math.max(30, itemCount * 4);
+  document.getElementById('tickerInner').style.animationDuration = duration + 's';
+}
+
+// ═══════════════════════════════════════════════════════
+// STATS ROW
+// ═══════════════════════════════════════════════════════
+async function loadStats() {
+  const statSyms = ['^GSPC', '^GSPTSE', '^IXIC', 'USDCAD=X'];
+  const quotes = await fetchQuotes(statSyms);
+  const map = {};
+  quotes.forEach(q => map[q.symbol] = q);
+
+  const pairs = [
+    ['^GSPC',   'stat-sp500',  'stat-sp500-chg'],
+    ['^GSPTSE', 'stat-tsx',    'stat-tsx-chg'],
+    ['^IXIC',   'stat-nasdaq', 'stat-nasdaq-chg'],
+    ['USDCAD=X','stat-usdcad', 'stat-usdcad-chg'],
+  ];
+  pairs.forEach(([sym, valId, chgId]) => {
+    const q = map[sym];
+    if (!q) return;
+    const el = document.getElementById(valId);
+    const chgEl = document.getElementById(chgId);
+    if (el) el.textContent = fmt(q.regularMarketPrice);
+    if (chgEl) {
+      const chg = fmtChg(q.regularMarketChange, q.regularMarketChangePercent);
+      chgEl.textContent = chg.text;
+      chgEl.className = 'stat-sub ' + chg.cls;
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// MARKETS TABLE
+// ═══════════════════════════════════════════════════════
+const MARKET_ROWS = [
+  { sym: '^GSPC',    desc: 'S&P 500',          cat: 'US Equity' },
+  { sym: '^GSPTSE',  desc: 'TSX Composite',     cat: 'CA Equity' },
+  { sym: '^IXIC',    desc: 'Nasdaq Composite',  cat: 'US Equity' },
+  { sym: '^DJI',     desc: 'Dow Jones',         cat: 'US Equity' },
+  { sym: '^VIX',     desc: 'CBOE Volatility',   cat: 'Volatility'},
+  { sym: 'USDCAD=X', desc: 'USD / CAD',         cat: 'FX'        },
+  { sym: 'GC=F',     desc: 'Gold Futures',      cat: 'Commodity' },
+  { sym: 'CL=F',     desc: 'Crude Oil WTI',     cat: 'Commodity' },
+  { sym: 'BTC-USD',  desc: 'Bitcoin USD',       cat: 'Crypto'    },
+];
+
+async function loadMarkets() {
+  const syms = MARKET_ROWS.map(r => r.sym);
+  const quotes = await fetchQuotes(syms);
+  const map = {};
+  quotes.forEach(q => map[q.symbol] = q);
+
+  if (!quotes.length) {
+    document.getElementById('mktBody').innerHTML = `<div style="padding:14px; color:var(--muted); font-size:12px;">Market data unavailable.</div>`;
+    return;
+  }
+
+  let html = `<table class="markets-table">
+    <thead><tr>
+      <th>Instrument</th>
+      <th>Price</th>
+      <th>Change</th>
+    </tr></thead><tbody>`;
+
+  MARKET_ROWS.forEach(row => {
+    const q = map[row.sym];
+    if (!q) return;
+    const chg = fmtChg(q.regularMarketChange, q.regularMarketChangePercent);
+    html += `<tr>
+      <td>
+        <div class="sym-name">${row.desc}</div>
+        <div class="sym-desc">${row.sym} · ${row.cat}</div>
+      </td>
+      <td><span class="price-val">${fmt(q.regularMarketPrice)}</span></td>
+      <td><span class="chg-pill ${chg.cls}">${chg.text}</span></td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('mktBody').innerHTML = html;
+  document.getElementById('mktUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-CA', {hour:'2-digit', minute:'2-digit'});
+}
+
+// ═══════════════════════════════════════════════════════
+// WATCHLIST
+// ═══════════════════════════════════════════════════════
+async function loadWatchlist() {
+  const syms = watchlist.map(w => w.sym);
+  if (!syms.length) {
+    document.getElementById('watchlistBody').innerHTML = `<div style="color:var(--muted); font-size:12px; padding:10px 0;">No symbols. Click + Add to add tickers.</div>`;
+    return;
+  }
+
+  const quotes = await fetchQuotes(syms);
+  const map = {};
+  quotes.forEach(q => map[q.symbol] = q);
+
+  let html = '';
+  watchlist.forEach((w, idx) => {
+    const q = map[w.sym];
+    const price = q ? fmt(q.regularMarketPrice) : '—';
+    const chg = q ? fmtChg(q.regularMarketChange, q.regularMarketChangePercent) : { text:'—', cls:'na' };
+    html += `<div class="watch-item">
+      <div>
+        <div class="watch-sym">${w.sym}</div>
+        <div class="watch-name">${w.name || (q && q.shortName) || ''}</div>
+      </div>
+      <div class="watch-price">
+        <div class="watch-price-val">${price}</div>
+        <div class="watch-chg ${chg.cls}">${chg.text}</div>
+      </div>
+      <button onclick="removeWatch(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 0 0 8px;" title="Remove">×</button>
+    </div>`;
+  });
+
+  document.getElementById('watchlistBody').innerHTML = html || '<div style="color:var(--muted); font-size:12px; padding:10px 0;">Empty watchlist.</div>';
+}
+
+function removeWatch(idx) {
+  watchlist.splice(idx, 1);
+  localStorage.setItem('wo_watchlist', JSON.stringify(watchlist));
+  loadWatchlist();
+}
+
+function openAddWatch() {
+  document.getElementById('watchSymInput').value = '';
+  document.getElementById('watchNameInput').value = '';
+  document.getElementById('addWatchModal').classList.add('open');
+  setTimeout(() => document.getElementById('watchSymInput').focus(), 50);
+}
+
+function addToWatchlist() {
+  const sym = document.getElementById('watchSymInput').value.trim().toUpperCase();
+  const name = document.getElementById('watchNameInput').value.trim();
+  if (!sym) return;
+  watchlist.push({ sym, name });
+  localStorage.setItem('wo_watchlist', JSON.stringify(watchlist));
+  closeModal('addWatchModal');
+  loadWatchlist();
+  loadTicker();
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+// ═══════════════════════════════════════════════════════
+// NEWS FEEDS (rss2json)
+// ═══════════════════════════════════════════════════════
+function timeAgo(dateStr) {
+  const d = new Date(dateStr);
+  const diff = Date.now() - d.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  return Math.floor(hrs / 24) + 'd ago';
+}
+
+function stripHtml(s) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = s;
+  return tmp.textContent || tmp.innerText || '';
+}
+
+async function fetchRSS(feedKey) {
+  const feed = FEEDS[feedKey];
+  if (!feed) return [];
+  const url = `${RSS2JSON}${encodeURIComponent(feed.url)}&count=${feed.count || 10}`;
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(r.status);
+    const data = await r.json();
+    if (data.status !== 'ok') throw new Error(data.message);
+    return data.items || [];
+  } catch(e) {
+    return null; // null = error, [] = empty
+  }
+}
+
+function renderNews(listId, items, sourceName) {
+  const el = document.getElementById(listId);
+  if (!el) return;
+  if (items === null) {
+    el.innerHTML = `<li><div class="news-error">⚠ Could not load feed. This may be a CORS restriction when opening as a local file. Try running from a local server (e.g. <code>python -m http.server</code>).</div></li>`;
+    return;
+  }
+  if (!items.length) {
+    el.innerHTML = `<li style="color:var(--muted);font-size:13px;padding:12px 0;">No items found.</li>`;
+    return;
+  }
+  el.innerHTML = items.map(item => {
+    const title = stripHtml(item.title || '').trim();
+    const time = timeAgo(item.pubDate);
+    const link = item.link || '#';
+    const src = item.author || sourceName || '';
+    return `<li class="news-item">
+      <div class="news-dot"></div>
+      <div class="news-body">
+        <a class="news-title" href="${link}" target="_blank" rel="noopener">${title}</a>
+        <div class="news-meta">
+          <span class="news-source">${sourceName}</span>
+          <span>${time}</span>
+        </div>
+      </div>
+    </li>`;
+  }).join('');
+}
+
+async function loadAllNews() {
+  document.getElementById('newsUpdated').textContent = 'Refreshing…';
+
+  const tasks = [
+    fetchRSS('business').then(items => renderNews('list-business', items, 'Reuters')),
+    fetchRSS('ma').then(items => renderNews('list-ma', items, 'Reuters M&A')),
+    fetchRSS('canada').then(items => renderNews('list-canada', items, 'Financial Post')),
+    fetchRSS('markets').then(items => renderNews('list-markets', items, 'MarketWatch')),
+    fetchRSS('reuters').then(items => renderNews('list-reuters', items, 'Reuters')),
+    fetchRSS('fp').then(items => renderNews('list-fp', items, 'Financial Post')),
+    fetchRSS('mw').then(items => renderNews('list-mw', items, 'MarketWatch')),
+    fetchRSS('yf').then(items => renderNews('list-yf', items, 'Yahoo Finance')),
+  ];
+
+  await Promise.allSettled(tasks);
+  document.getElementById('newsUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-CA', {hour:'2-digit', minute:'2-digit'});
+}
+
+// ═══════════════════════════════════════════════════════
+// ECONOMIC CALENDAR (static, key upcoming events)
+// ═══════════════════════════════════════════════════════
+function buildEconCalendar() {
+  // Manually curated; updated weekly by user or automatically
+  const events = [
+    { date: 'Jun 4',  name: 'US ISM Services PMI (May)', impact: 'high' },
+    { date: 'Jun 4',  name: 'Bank of Canada Rate Decision', impact: 'high' },
+    { date: 'Jun 5',  name: 'US ADP Employment Report (May)', impact: 'med' },
+    { date: 'Jun 6',  name: 'US Non-Farm Payrolls (May)', impact: 'high' },
+    { date: 'Jun 6',  name: 'Canada Employment (May)', impact: 'high' },
+    { date: 'Jun 10', name: 'US CPI Inflation (May)', impact: 'high' },
+    { date: 'Jun 11', name: 'US PPI (May)', impact: 'med' },
+    { date: 'Jun 12', name: 'Federal Reserve Rate Decision', impact: 'high' },
+    { date: 'Jun 13', name: 'University of Michigan Sentiment', impact: 'med' },
+    { date: 'Jun 18', name: 'US Retail Sales (May)', impact: 'med' },
+    { date: 'Jun 25', name: 'US GDP Q1 Final Revision', impact: 'med' },
+  ];
+
+  const impactClass = { high: 'impact-high', med: 'impact-med', low: 'impact-low' };
+  const impactLabel = { high: '● High', med: '● Med', low: '● Low' };
+
+  document.getElementById('econCalendar').innerHTML = events.map(e => `
+    <div class="econ-item">
+      <div class="econ-date">${e.date}</div>
+      <div class="econ-body">
+        <div class="econ-name">${e.name}</div>
+        <span class="econ-impact ${impactClass[e.impact]}">${impactLabel[e.impact]}</span>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════
+function switchTab(group, panelId, tabEl) {
+  const container = tabEl.closest('.card');
+  container.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  container.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
+  tabEl.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+// CHIPS / FEED TOGGLE
+// ═══════════════════════════════════════════════════════
+function toggleFeed(feed, chip) {
+  chip.classList.toggle('active');
+  const idx = activeFeeds.indexOf(feed);
+  if (idx >= 0) activeFeeds.splice(idx, 1);
+  else activeFeeds.push(feed);
+  localStorage.setItem('wo_feeds', JSON.stringify(activeFeeds));
+}
+
+function syncChips() {
+  document.querySelectorAll('[data-feed]').forEach(chip => {
+    const feed = chip.dataset.feed;
+    if (activeFeeds.includes(feed)) chip.classList.add('active');
+    else chip.classList.remove('active');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// SETTINGS MODAL (stub)
+// ═══════════════════════════════════════════════════════
+function openSettings() {
+  alert('Customize feed chips above the dashboard to toggle news categories on/off.\n\nUse the Watchlist "+ Add" button to add custom stock symbols.');
+}
+
+// ═══════════════════════════════════════════════════════
+// REFRESH ALL
+// ═══════════════════════════════════════════════════════
+async function refreshAll() {
+  await Promise.allSettled([
+    loadStats(),
+    loadTicker(),
+    loadMarkets(),
+    loadWatchlist(),
+    loadAllNews(),
+  ]);
+  startCountdown();
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+(async function init() {
+  syncChips();
+  buildEconCalendar();
+  await refreshAll();
+})();
+</script>
+</body>
+</html>
