@@ -700,8 +700,9 @@
 // CONFIG
 // ═══════════════════════════════════════════════════════
 const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
-const YF_QUOTE = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=';
-const YF_QUOTE2 = 'https://query2.finance.yahoo.com/v7/finance/quote?symbols=';
+const CORS = 'https://corsproxy.io/?';
+const YF_QUOTE = `${CORS}${encodeURIComponent('https://query1.finance.yahoo.com/v7/finance/quote?symbols=')}`;
+const YF_QUOTE2 = `${CORS}${encodeURIComponent('https://query2.finance.yahoo.com/v7/finance/quote?symbols=')}`;
 
 const INDICES = [
   { sym: '^GSPC',   label: 'S&P 500',        statId: 'stat-sp500'  },
@@ -726,14 +727,14 @@ const DEFAULT_WATCHLIST = [
 ];
 
 const FEEDS = {
-  business: { url: 'https://feeds.reuters.com/reuters/businessNews', name: 'Reuters', count: 12 },
-  ma:       { url: 'https://feeds.reuters.com/reuters/mergersNews',   name: 'Reuters M&A', count: 12 },
-  canada:   { url: 'https://financialpost.com/feed',                  name: 'Financial Post', count: 12 },
-  markets:  { url: 'https://feeds.marketwatch.com/marketwatch/marketpulse/', name: 'MarketWatch', count: 12 },
-  reuters:  { url: 'https://feeds.reuters.com/reuters/topNews',       name: 'Reuters Top', count: 10 },
-  fp:       { url: 'https://financialpost.com/feed',                  name: 'Financial Post', count: 10 },
-  mw:       { url: 'https://feeds.marketwatch.com/marketwatch/topstories/', name: 'MarketWatch', count: 10 },
-  yf:       { url: 'https://finance.yahoo.com/rss/topfinstories',     name: 'Yahoo Finance', count: 10 },
+  business: { url: 'https://feeds.bbci.co.uk/news/business/rss.xml',                       name: 'BBC Business',    count: 12 },
+  ma:       { url: 'https://www.globenewswire.com/RssFeed/subjectcode/M-A-Mergers-Acquisitions', name: 'GlobeNewswire M&A', count: 12 },
+  canada:   { url: 'https://financialpost.com/feed',                                        name: 'Financial Post',  count: 12 },
+  markets:  { url: 'https://feeds.marketwatch.com/marketwatch/topstories/',                 name: 'MarketWatch',     count: 12 },
+  reuters:  { url: 'https://feeds.bbci.co.uk/news/rss.xml',                                name: 'BBC News',        count: 10 },
+  fp:       { url: 'https://financialpost.com/feed',                                        name: 'Financial Post',  count: 10 },
+  mw:       { url: 'https://feeds.marketwatch.com/marketwatch/topstories/',                 name: 'MarketWatch',     count: 10 },
+  yf:       { url: 'https://finance.yahoo.com/rss/topfinstories',                          name: 'Yahoo Finance',   count: 10 },
 };
 
 // ═══════════════════════════════════════════════════════
@@ -775,19 +776,20 @@ function startCountdown() {
 // ═══════════════════════════════════════════════════════
 async function fetchQuotes(symbols) {
   const syms = symbols.join(',');
+  const fields = 'regularMarketPrice,regularMarketChange,regularMarketChangePercent,shortName';
   const urls = [
-    `${YF_QUOTE}${encodeURIComponent(syms)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,shortName`,
-    `${YF_QUOTE2}${encodeURIComponent(syms)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,shortName`,
+    `${CORS}${encodeURIComponent(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}`)}`,
+    `${CORS}${encodeURIComponent(`https://query2.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}`)}`,
   ];
   for (const url of urls) {
     try {
-      const r = await fetch(url, { mode: 'cors', headers: { 'Accept': 'application/json' } });
+      const r = await fetch(url);
       if (!r.ok) continue;
       const data = await r.json();
-      return data?.quoteResponse?.result || [];
+      const result = data?.quoteResponse?.result;
+      if (result && result.length) return result;
     } catch(e) {}
   }
-  // Fallback: chart endpoint for single symbols (slower but more reliable)
   return [];
 }
 
